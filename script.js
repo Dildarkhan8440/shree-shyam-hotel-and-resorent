@@ -5,13 +5,25 @@
 
 $(document).ready(function() {
 
+    // --- Force Page Scroll to Top on Refresh ---
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+    $(window).on('beforeunload', function() {
+        window.scrollTo(0, 0);
+    });
+
     // --- Preloader Fade Out ---
     function dismissPreloader() {
         if ($('.preloader').length) {
             $('.preloader').fadeOut('slow', function() {
                 $('body').removeClass('loading-active');
+                $('.hero-content').addClass('hero-ready'); // Trigger staggered hero entrance animations
                 $(this).remove();
             });
+        } else {
+            $('.hero-content').addClass('hero-ready');
         }
     }
 
@@ -28,7 +40,8 @@ $(document).ready(function() {
         duration: 900,
         once: false,
         offset: 100,
-        easing: 'ease-out-cubic'
+        easing: 'ease-out-cubic',
+        disable: 'mobile' // Disable animations on mobile devices for better performance & layout stability
     });
 
     // --- Dynamic Navbar Background on Scroll ---
@@ -220,5 +233,64 @@ $(document).ready(function() {
 
     // --- Dynamic Copyright Year ---
     $('#currentYear').text(new Date().getFullYear());
+
+    // --- Custom Scroll Reveal Observer for Headings ---
+    if ('IntersectionObserver' in window) {
+        const revealCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    $(entry.target).addClass('active');
+                    observer.unobserve(entry.target); // Animate only once
+                }
+            });
+        };
+
+        const revealObserver = new IntersectionObserver(revealCallback, {
+            root: null,
+            threshold: 0.15,
+            rootMargin: "0px 0px -40px 0px"
+        });
+
+        // Register observer on our animate classes
+        $('.reveal-fade-up, .reveal-letter-stretch, .title-divider-grow').each(function() {
+            revealObserver.observe(this);
+        });
+    } else {
+        // Fallback for older browsers
+        $('.reveal-fade-up, .reveal-letter-stretch, .title-divider-grow').addClass('active');
+    }
+
+    function initGoldDust() {
+        $('section, footer').each(function() {
+            const $section = $(this);
+            if ($section.css('position') === 'static') {
+                $section.css('position', 'relative');
+            }
+            const $container = $('<div class="gold-dust-container"></div>');
+            $section.append($container);
+
+            const sectionHeight = $section.outerHeight() || 600;
+            // Spawn ~1 particle per 50px height, capped at 25 per section
+            const particleCount = Math.min(Math.round(sectionHeight / 50), 25); 
+
+            for (let i = 0; i < particleCount; i++) {
+                const size = Math.random() * 3.5 + 1.5; // size between 1.5px and 5px
+                const left = Math.random() * 100;
+                const duration = Math.random() * 8 + 8; // duration between 8s and 16s
+                const delay = Math.random() * 12; // animation delay offset
+                
+                const $particle = $('<span class="gold-particle"></span>').css({
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: left + '%',
+                    animationDuration: duration + 's',
+                    animationDelay: '-' + delay + 's'
+                });
+                $container.append($particle);
+            }
+        });
+    }
+    
+    initGoldDust();
 
 });

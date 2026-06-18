@@ -39,9 +39,8 @@ $(document).ready(function() {
     AOS.init({
         duration: 900,
         once: false,
-        offset: 100,
-        easing: 'ease-out-cubic',
-        disable: 'mobile' // Disable animations on mobile devices for better performance & layout stability
+        offset: 80, // Reduced offset so animations trigger earlier on smaller mobile viewports
+        easing: 'ease-out-cubic'
     });
 
     // --- Dynamic Navbar Background on Scroll ---
